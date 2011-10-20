@@ -1,0 +1,5 @@
+Revision history for SBG-MySQL-Backup
+
+0.02    2011-07-11
+        Re-packaged with module-starter to add tests and defined dependencies
+

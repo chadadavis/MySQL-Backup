@@ -1,0 +1,44 @@
+#!/usr/bin/env perl
+use Moose;
+
+=head1 SYNOPSIS
+
+    mysqlbackup B<--host dbhost> [--db <database1>] [--db <database2> ]
+
+=head1 DESCRIPTION
+
+A simple wrapper around L<SBG::MySQL::Backup>
+
+=head1 SEE ALSO
+
+L<SBG::MySQL::Backup>
+
+=cut
+
+# Log adapter
+#Log::Any::Adapter->set('+SBG::Log');
+
+# Create the object with all the command line options
+my $self = MySQLBackup->new_with_options();    
+$self->_prepare;
+
+if ($self->restore) {
+    # Restore databases
+    if ($self->incremental) {
+        # Incremental restore (replay transactions)
+        $self->replay($_) for $self->db->flatten;
+    } else {
+        # Full restore
+        $self->recreate($_) for $self->db->flatten;
+    }
+} else {
+    # Backup databases
+    if ($self->incremental) {
+        # Incremental backup: stop the logs and copy the logs
+        $self->flush_logs;
+    } else {
+        # Full backup
+        $self->backup($_) for $self->db->flatten;
+    }
+}
+
